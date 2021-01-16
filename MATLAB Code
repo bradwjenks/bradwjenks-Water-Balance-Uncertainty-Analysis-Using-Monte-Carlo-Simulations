@@ -1,0 +1,291 @@
+%define constants
+N = 50000;
+ 
+%call data from input Excel spreadsheet
+prompt = 'Please enter the input data spreadsheet name (no spaces):';
+dlgtitle = 'Water Balance Input';
+input = inputdlg(prompt,dlgtitle);
+file_name = append(input{1},'.xlsm');
+[num,txt,raw] = xlsread(file_name,'MATLAB_INPUT');
+ 
+%assign inputs and pdfs to variables
+source_input = num(1,1:4);
+source_input(1,2) = source_input(1,2)/100*source_input(1,1);
+if txt(2,2) == "Normal"
+    source_pdf = makedist('Normal','mu',source_input(1,1),'sigma',source_input(1,2));
+elseif txt(2,2) == "Triangular"
+    source_pdf = makedist('Triangular','a',source_input(1,3),'b',source_input(1,1),'c',source_input(1,4));
+elseif txt(2,2) == "Uniform"
+    source_pdf = makedist('Uniform','lower',source_input(1,3),'upper',source_input(1,4));    
+elseif txt(2,2) == "Exponential"
+    source_pdf = makedist('Exponential','mu',source_input(1,1));
+else
+    source_pdf = 'N/A';
+end
+ 
+imp_input = num(2,1:4);
+imp_input(1,2) = imp_input(1,2)/100*imp_input(1,1);
+if txt(3,2) == "Normal"
+    imp_pdf = makedist('Normal','mu',imp_input(1,1),'sigma',imp_input(1,2));
+elseif txt(3,2) == "Triangular"
+    imp_pdf = makedist('Triangular','a',imp_input(1,3),'b',imp_input(1,1),'c',imp_input(1,4));
+elseif txt(3,2) == "Uniform"
+    imp_pdf = makedist('Uniform','lower',imp_input(1,3),'upper',imp_input(1,4));    
+elseif txt(3,2) == "Exponential"
+    imp_pdf = makedist('Exponential','mu',imp_input(1,1));
+else
+    imp_pdf = 'N/A';
+end
+ 
+exp_input = num(3,1:4);
+exp_input(1,2) = exp_input(1,2)/100*exp_input(1,1);
+if txt(4,2) == "Normal"
+    exp_pdf = makedist('Normal','mu',exp_input(1,1),'sigma',exp_input(1,2));
+elseif txt(4,2) == "Triangular"
+    exp_pdf = makedist('Triangular','a',exp_input(1,3),'b',exp_input(1,1),'c',exp_input(1,4));
+elseif txt(4,2) == "Uniform"
+    exp_pdf = makedist('Uniform','lower',exp_input(1,3),'upper',exp_input(1,4));    
+elseif txt(4,2) == "Exponential"
+    exp_pdf = makedist('Exponential','mu',exp_input(1,1));
+else
+    exp_pdf = 'N/A';
+end
+ 
+bm_input = num(4,1:4);
+bm_input(1,2) = bm_input(1,2)/100*bm_input(1,1);
+if txt(5,2) == "Normal"
+    bm_pdf = makedist('Normal','mu',bm_input(1,1),'sigma',bm_input(1,2));
+elseif txt(5,2) == "Triangular"
+    bm_pdf = makedist('Triangular','a',bm_input(1,3),'b',bm_input(1,1),'c',bm_input(1,4));
+elseif txt(5,2) == "Uniform"
+    bm_pdf = makedist('Uniform','lower',bm_input(1,3),'upper',bm_input(1,4));    
+elseif txt(5,2) == "Exponential"
+    bm_pdf = makedist('Exponential','mu',bm_input(1,1));
+else
+    bm_pdf = 'N/A';
+end
+ 
+bu_input = num(5,1:4);
+bu_input(1,2) = bu_input(1,2)/100*bu_input(1,1);
+if txt(6,2) == "Normal"
+    bu_pdf = makedist('Normal','mu',bu_input(1,1),'sigma',bu_input(1,2));
+elseif txt(6,2) == "Triangular"
+    bu_pdf = makedist('Triangular','a',bu_input(1,3),'b',bu_input(1,1),'c',bu_input(1,4));
+elseif txt(6,2) == "Uniform"
+    bu_pdf = makedist('Uniform','lower',bu_input(1,3),'upper',bu_input(1,4));    
+elseif txt(6,2) == "Exponential"
+    bu_pdf = makedist('Exponential','mu',bu_input(1,1));
+else
+    bu_pdf = 'N/A';
+end
+ 
+um_input = num(6,1:4);
+um_input(1,2) = um_input(1,2)/100*um_input(1,1);
+if txt(7,2) == "Normal"
+    um_pdf = makedist('Normal','mu',um_input(1,1),'sigma',um_input(1,2));
+elseif txt(7,2) == "Triangular"
+    um_pdf = makedist('Triangular','a',um_input(1,3),'b',um_input(1,1),'c',um_input(1,4));
+elseif txt(7,2) == "Uniform"
+    um_pdf = makedist('Uniform','lower',um_input(1,3),'upper',um_input(1,4));    
+elseif txt(7,2) == "Exponential"
+    um_pdf = makedist('Exponential','mu',um_input(1,1));
+else
+    um_pdf = 'N/A';
+end
+ 
+uu_input = num(7,1:4);
+uu_input(1,2) = uu_input(1,2)/100*uu_input(1,1);
+if txt(8,2) == "Normal"
+    uu_pdf = makedist('Normal','mu',uu_input(1,1),'sigma',uu_input(1,2));
+elseif txt(8,2) == "Triangular"
+    uu_pdf = makedist('Triangular','a',uu_input(1,3),'b',uu_input(1,1),'c',uu_input(1,4));
+elseif txt(8,2) == "Uniform"
+    uu_pdf = makedist('Uniform','lower',uu_input(1,3),'upper',uu_input(1,4));    
+elseif txt(8,2) == "Exponential"
+    uu_pdf = makedist('Exponential','mu',uu_input(1,1));
+else
+    uu_pdf = 'N/A';
+end
+ 
+uc_input = num(8,1:4);
+uc_input(1,2) = uc_input(1,2)/100*uc_input(1,1);
+if txt(9,2) == "Normal"
+    uc_pdf = makedist('Normal','mu',uc_input(1,1),'sigma',uc_input(1,2));
+elseif txt(9,2) == "Triangular"
+    uc_pdf = makedist('Triangular','a',uc_input(1,3),'b',uc_input(1,1),'c',uc_input(1,4));
+elseif txt(9,2) == "Uniform"
+    uc_pdf = makedist('Uniform','lower',uc_input(1,3),'upper',uc_input(1,4));    
+elseif txt(9,2) == "Exponential"
+    uc_pdf = makedist('Exponential','mu',uc_input(1,1));
+else
+    uc_pdf = 'N/A';
+end
+ 
+mi_input = num(9,1:4);
+mi_input(1,2) = mi_input(1,2)/100*mi_input(1,1);
+if txt(10,2) == "Normal"
+    mi_pdf = makedist('Normal','mu',mi_input(1,1),'sigma',mi_input(1,2));
+elseif txt(10,2) == "Triangular"
+    mi_pdf = makedist('Triangular','a',mi_input(1,3),'b',mi_input(1,1),'c',mi_input(1,4));
+elseif txt(10,2) == "Uniform"
+    mi_pdf = makedist('Uniform','lower',mi_input(1,3),'upper',mi_input(1,4));    
+elseif txt(10,2) == "Exponential"
+    mi_pdf = makedist('Exponential','mu',mi_input(1,1));
+else
+    mi_pdf = 'N/A';
+end
+ 
+sde_input = num(10,1:4);
+sde_input(1,2) = sde_input(1,2)/100*sde_input(1,1);
+if txt(11,2) == "Normal"
+    sde_pdf = makedist('Normal','mu',sde_input(1,1),'sigma',sde_input(1,2));
+elseif txt(11,2) == "Triangular"
+    sde_pdf = makedist('Triangular','a',sde_input(1,3),'b',sde_input(1,1),'c',sde_input(1,4));
+elseif txt(11,2) == "Uniform"
+    sde_pdf = makedist('Uniform','lower',sde_input(1,3),'upper',sde_input(1,4));    
+elseif txt(11,2) == "Exponential"
+    sde_pdf = makedist('Exponential','mu',sde_input(1,1));
+else
+    sde_pdf = 'N/A';
+end
+ 
+%define arrays for histogram plotting
+real_loss = zeros(N,1);
+source_hist = zeros(N,1);
+imp_hist = zeros(N,1);
+exp_hist = zeros(N,1);
+bm_hist = zeros(N,1);
+bu_hist = zeros(N,1);
+um_hist = zeros(N,1);
+uu_hist = zeros(N,1);
+uc_hist = zeros(N,1);
+mi_hist = zeros(N,1);
+sde_hist = zeros(N,1);
+ 
+for n=1:N
+    if source_input(1,1) > 0
+        source_calc = icdf(source_pdf,rand);
+    else
+        source_calc = 0;
+    end
+    if exp_input(1,1) > 0
+        exp_calc = icdf(exp_pdf,rand);
+    else
+        exp_calc = 0;
+    end
+    if imp_input(1,1) > 0
+        imp_calc = icdf(imp_pdf,rand);
+    else
+        imp_calc = 0;
+    end
+    if bm_input(1,1) > 0
+        bm_calc = icdf(bm_pdf,rand);
+    else
+        bm_calc = 0;
+    end	
+    if bu_input(1,1) > 0
+        bu_calc = icdf(bu_pdf,rand);
+    else
+        bu_calc = 0;
+    end
+    if um_input(1,1) > 0
+        um_calc = icdf(um_pdf,rand);
+    else
+        um_calc = 0;
+    end
+    
+    if uu_input(1,1) > 0
+        uu_calc = icdf(uu_pdf,rand);
+    else
+        uu_calc = 0;
+    end  
+    if uc_input(1,1) > 0
+        uc_calc = icdf(uc_pdf,rand);
+    else
+        uc_calc = 0;
+    end  
+    if mi_input(1,1) > 0
+        mi_calc = icdf(mi_pdf,rand);
+    else
+        mi_calc = 0;
+    end  
+    if sde_input(1,1) > 0
+        sde_calc = icdf(sde_pdf,rand);
+    else
+        sde_calc = 0;
+    end  
+    source_hist(n) = source_calc;
+    imp_hist(n) = imp_calc;
+    exp_hist(n) = exp_calc;
+    bm_hist(n) = bm_calc;
+    bu_hist(n) = bu_calc;
+    um_hist(n) = um_calc;
+    uu_hist(n) = uu_calc;
+    uc_hist(n) = uc_calc;
+    mi_hist(n) = mi_calc;
+    sde_hist(n) = sde_calc;
+    
+    real_loss(n) = source_calc + imp_calc - exp_calc - bm_calc - bu_calc - um_calc - uu_calc - uc_calc - mi_calc - sde_calc;
+end
+ 
+%real loss calculations
+real_loss_mean = mean(real_loss);
+real_loss_s = zeros(N,1);
+for x=1:N
+    real_loss_s(x) = (real_loss(x)-real_loss_mean)^2;
+end 
+real_loss_std = (sum(real_loss_s)/(N-1))^0.5;
+real_loss_LQ = fix(quantile(real_loss,0.025));
+real_loss_UQ = fix(quantile(real_loss,0.975));
+ 
+simulation = 1:1:N;
+simulation = simulation';
+col_header={'No. of Simulations','Real Loss (ML)'};
+ 
+writematrix(real_loss,'MCM_Tool_Output.xlsx','Sheet','MCM_OUTPUT','Range','B2');
+writematrix(simulation,'MCM_Tool_Output.xlsx','Sheet','MCM_OUTPUT','Range','A2');
+writecell(col_header,'MCM_Tool_Output.xlsx','Sheet','MCM_OUTPUT','Range','A1');
+ 
+%real loss plotting
+figure(1);
+yyaxis left
+histogram(real_loss,50,'Normalization','probability','FaceColor',[0.82 0.82 0.82],'FaceAlpha',0.5,'EdgeColor',[0.35 0.35 0.35],'LineWidth',1);
+hold on;
+ 
+ylabel('Probability','FontWeight','bold','FontSize',10);
+% set(gca,'YTick',[]);
+ 
+xlim([roundn(quantile(real_loss,0.000001),3) roundn(quantile(real_loss,0.999999),3)]);
+b1 = histcounts(real_loss,50);
+b2 = max(b1)/N;
+ylim([0 roundn(b2,-2)+0.02]);
+hold on;
+ 
+line([real_loss_LQ,real_loss_LQ],ylim,'LineStyle','--','LineWidth',1.5,'Color','k');
+hold on
+line([real_loss_mean,real_loss_mean],ylim,'LineWidth',1.5,'LineStyle','--','Color','k');
+hold on
+line([real_loss_UQ,real_loss_UQ],ylim,'LineWidth',1.5,'LineStyle','--','Color','k');
+hold on
+text(real_loss_LQ-300,b2*0.25,'2.5 Percentile','Rotation',90,'FontSize',10,'FontWeight','bold');
+hold on
+text(real_loss_mean-300,b2*0.25,'Mean','Rotation',90,'FontSize',10,'FontWeight','bold');
+hold on
+text(real_loss_UQ-300,b2*0.25,'97.5 Percentile','Rotation',90,'FontSize',10,'FontWeight','bold');
+hold on;
+ 
+yyaxis right
+rl_cdf = cdfplot(real_loss);
+set(rl_cdf,'Color',[0.00 0.43 0.78],'LineWidth',1.5);
+ylabel('Cumulative Probability','FontWeight','bold','FontSize',10);
+title('');
+% set(gca,'YTick',[]);
+hold on;
+ 
+ax = gca;
+ax.YAxis(1).Color = 'k';
+ax.YAxis(2).Color = 'k';
+xlabel('Real Loss (ML)','FontWeight','bold','FontSize',10);
+ 
+figure(2);
+normplot(real_loss);
